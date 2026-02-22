@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import { useAuth } from "@/context/auth-context";
 
 const months = [
   "Janeiro",
@@ -35,6 +36,20 @@ export function Topbar({
   currentMonth = new Date().getMonth(),
   currentYear = new Date().getFullYear(),
 }: TopbarProps) {
+  const { user, firebaseUser, logout } = useAuth();
+
+  // Use Firebase data if Firestore hasn't loaded yet
+  const displayName = user?.name || firebaseUser?.displayName || "Usuário";
+  const displayEmail = user?.email || firebaseUser?.email || "";
+
+  // Generate initials for avatar
+  const initials = displayName
+    .split(" ")
+    .slice(0, 2)
+    .map((word) => word[0])
+    .join("")
+    .toUpperCase();
+
   return (
     <header className="sticky top-0 z-40 flex items-center justify-between h-16 px-6 bg-background/95 backdrop-blur-sm border-b border-border">
       {/* Left side - Month selector */}
@@ -90,12 +105,14 @@ export function Topbar({
             >
               <Avatar className="w-8 h-8">
                 <AvatarFallback className="bg-primary text-primary-foreground text-sm font-medium">
-                  JD
+                  {initials}
                 </AvatarFallback>
               </Avatar>
               <div className="hidden md:flex flex-col items-start">
-                <span className="text-sm font-medium">João Demo</span>
-                <span className="text-xs text-muted-foreground">Plano Free</span>
+                <span className="text-sm font-medium">{displayName}</span>
+                <span className="text-xs text-muted-foreground">
+                  Plano Free
+                </span>
               </div>
               <ChevronDown className="w-4 h-4 text-muted-foreground" />
             </Button>
@@ -104,7 +121,7 @@ export function Topbar({
             <DropdownMenuItem>Meu Perfil</DropdownMenuItem>
             <DropdownMenuItem>Planos e Assinatura</DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem className="text-destructive">
+            <DropdownMenuItem className="text-destructive" onClick={logout}>
               Sair
             </DropdownMenuItem>
           </DropdownMenuContent>

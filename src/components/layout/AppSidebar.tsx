@@ -46,7 +46,7 @@ export function AppSidebar() {
     <aside
       className={cn(
         "flex flex-col h-screen bg-sidebar border-r border-sidebar-border transition-all duration-300 ease-in-out sticky top-0",
-        collapsed ? "w-[72px]" : "w-[260px]"
+        collapsed ? "w-[72px]" : "w-[260px]",
       )}
     >
       {/* Logo */}
@@ -57,7 +57,7 @@ export function AppSidebar() {
           </div>
           {!collapsed && (
             <span className="font-semibold text-lg text-sidebar-accent-foreground tracking-tight">
-              FinTrack
+              Clarity Finance
             </span>
           )}
         </div>
@@ -75,7 +75,7 @@ export function AppSidebar() {
                 "hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
                 isActive(item.url)
                   ? "bg-sidebar-accent text-sidebar-accent-foreground"
-                  : "text-sidebar-foreground"
+                  : "text-sidebar-foreground",
               )}
             >
               <item.icon className="w-5 h-5 shrink-0" />
@@ -107,7 +107,7 @@ export function AppSidebar() {
                 "hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
                 isActive(item.url)
                   ? "bg-sidebar-accent text-sidebar-accent-foreground"
-                  : "text-sidebar-foreground"
+                  : "text-sidebar-foreground",
               )}
             >
               <item.icon className="w-5 h-5 shrink-0" />
@@ -125,7 +125,7 @@ export function AppSidebar() {
           onClick={() => setCollapsed(!collapsed)}
           className={cn(
             "w-full justify-center text-sidebar-muted hover:text-sidebar-accent-foreground hover:bg-sidebar-accent",
-            !collapsed && "justify-start px-3"
+            !collapsed && "justify-start px-3",
           )}
         >
           {collapsed ? (
