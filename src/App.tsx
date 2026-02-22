@@ -9,6 +9,8 @@ import RecurringExpenses from "./pages/RecurringExpenses";
 import CreditCards from "./pages/CreditCards";
 import Reports from "./pages/Reports";
 import Settings from "./pages/Settings";
+import Landing from "./pages/Landing";
+import Login from "./pages/Login";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -21,6 +23,8 @@ const App = () => (
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Index />} />
+          <Route path="/landing" element={<Landing />} />
+          <Route path="/login" element={<Login />} />
           <Route path="/expenses" element={<Expenses />} />
           <Route path="/recurring" element={<RecurringExpenses />} />
           <Route path="/cards" element={<CreditCards />} />
