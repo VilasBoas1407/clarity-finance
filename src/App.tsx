@@ -3,8 +3,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Index from "./pages/Index";
-import Expenses from "./pages/Expenses";
+import Transaction from "./pages/Transaction";
 import RecurringExpenses from "./pages/RecurringExpenses";
 import CreditCards from "./pages/CreditCards";
 import Reports from "./pages/Reports";
@@ -14,6 +13,7 @@ import Login from "./pages/Login";
 import NotFound from "./pages/NotFound";
 import { AuthProvider } from "./context/auth-context";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
+import Dashboard from "./pages/Dashboard";
 
 const queryClient = new QueryClient();
 
@@ -31,15 +31,15 @@ const App = () => (
               path="/dashboard"
               element={
                 <ProtectedRoute>
-                  <Index />
+                  <Dashboard />
                 </ProtectedRoute>
               }
             />
             <Route
-              path="/expenses"
+              path="/transactions"
               element={
                 <ProtectedRoute>
-                  <Expenses />
+                  <Transaction />
                 </ProtectedRoute>
               }
             />

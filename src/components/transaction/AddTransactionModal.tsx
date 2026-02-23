@@ -2,10 +2,10 @@ import { useState } from "react";
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
+  DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -30,7 +30,7 @@ import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { Transaction } from "@/types/transaction";
 
-interface AddExpenseModalProps {
+interface AddTransactionModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onCreateTransaction: (
@@ -62,15 +62,15 @@ const paymentMethods = [
   { value: "transferencia", label: "Transferencia" },
 ];
 
-export function AddExpenseModal({
+export function AddTransactionModal({
   open,
   onOpenChange,
   onCreateTransaction,
-}: AddExpenseModalProps) {
+}: AddTransactionModalProps) {
   const [description, setDescription] = useState("");
   const [category, setCategory] = useState("");
   const [amount, setAmount] = useState("");
-  const [type, setType] = useState<"expense" | "income">("expense");
+  const [type, setType] = useState<"income" | "expense">("expense");
   const [paymentMethod, setPaymentMethod] = useState("");
   const [date, setDate] = useState<Date>();
   const [loading, setLoading] = useState(false);
@@ -99,15 +99,15 @@ export function AddExpenseModal({
           type === "expense"
             ? -Math.abs(numericAmount)
             : Math.abs(numericAmount),
-        date,
-        paymentMethod,
         type,
+        paymentMethod,
+        date,
       });
-      toast.success(`Lancamento "${description}" adicionado`);
+      toast.success(`Lançamento "${description}" adicionado`);
       resetForm();
       onOpenChange(false);
-    } catch {
-      toast.error("Nao foi possivel adicionar o lancamento");
+    } catch (error) {
+      toast.error("Não foi possível adicionar o lançamento");
     } finally {
       setLoading(false);
     }
@@ -137,7 +137,7 @@ export function AddExpenseModal({
             <Label>Tipo</Label>
             <Select
               value={type}
-              onValueChange={(value) => setType(value as "expense" | "income")}
+              onValueChange={(value) => setType(value as "income" | "expense")}
             >
               <SelectTrigger>
                 <SelectValue />

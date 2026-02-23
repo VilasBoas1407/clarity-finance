@@ -57,7 +57,7 @@ export default function Login() {
         <div className="absolute bottom-0 left-0 w-72 h-72 bg-primary/10 rounded-full blur-3xl" />
 
         <div className="relative z-10">
-          <Link to="/landing" className="flex items-center gap-2 mb-20">
+          <Link to="/" className="flex items-center gap-2 mb-20">
             <div className="w-9 h-9 rounded-lg bg-primary flex items-center justify-center">
               <DollarSign className="w-5 h-5 text-primary-foreground" />
             </div>

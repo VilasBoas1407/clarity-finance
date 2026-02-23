@@ -34,8 +34,10 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useEffect, useMemo, useState } from "react";
-import { AddExpenseModal } from "@/components/expenses/AddExpenseModal";
+import { AddTransactionModal } from "@/components/transaction/AddTransactionModal";
 import { useTransactions } from "@/hooks/use-transactions";
+import { toast } from "sonner";
+import { Transaction as TransactionType } from "@/types/transaction";
 
 const buildLast12Months = () => {
   const months: { value: string; label: string }[] = [];
@@ -62,14 +64,21 @@ const paymentMethodLabelMap: Record<string, string> = {
   transferencia: "Transferencia",
 };
 
-const Expenses = () => {
+const Transaction = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const [search, setSearch] = useState("");
   const monthOptions = useMemo(() => buildLast12Months(), []);
-  const [selectedYearMonth, setSelectedYearMonth] = useState(monthOptions[0]?.value ?? "");
+  const [selectedYearMonth, setSelectedYearMonth] = useState(
+    monthOptions[0]?.value ?? "",
+  );
 
-  const { transactions, fetchTransactionsByMonth, addTransaction } =
-    useTransactions();
+  const {
+    transactions,
+    fetchTransactionsByMonth,
+    addTransaction,
+    updateTransaction,
+    deleteTransaction,
+  } = useTransactions();
 
   useEffect(() => {
     if (!selectedYearMonth) return;
@@ -88,7 +97,7 @@ const Expenses = () => {
     });
   }, [transactions, search]);
 
-  const totalTransactionsOut = useMemo(
+  const totalOut = useMemo(
     () =>
       Math.abs(
         filteredTransactions
@@ -98,7 +107,7 @@ const Expenses = () => {
     [filteredTransactions],
   );
 
-  const totalIncome = useMemo(
+  const totalIn = useMemo(
     () =>
       filteredTransactions
         .filter((transaction) => transaction.type === "income")
@@ -123,13 +132,58 @@ const Expenses = () => {
     return createdId;
   };
 
+  const handleDeleteTransaction = async (transactionId: string) => {
+    try {
+      await deleteTransaction(transactionId);
+      toast.success("Transacao excluida");
+      await fetchTransactionsByMonth(selectedYearMonth);
+    } catch {
+      toast.error("Nao foi possivel excluir a transacao");
+    }
+  };
+
+  const handleEditTransaction = async (transaction: TransactionType) => {
+    const nextDescription = window.prompt("Descricao", transaction.description);
+    if (nextDescription === null) return;
+
+    const nextAmountInput = window.prompt(
+      "Valor",
+      Math.abs(transaction.amount).toString(),
+    );
+    if (nextAmountInput === null) return;
+
+    const parsedAmount = Number(nextAmountInput.replace(",", "."));
+    if (Number.isNaN(parsedAmount) || parsedAmount <= 0) {
+      toast.error("Valor invalido");
+      return;
+    }
+
+    try {
+      await updateTransaction(transaction.id, {
+        description: nextDescription.trim() || transaction.description,
+        amount:
+          transaction.type === "expense"
+            ? -Math.abs(parsedAmount)
+            : Math.abs(parsedAmount),
+      });
+      toast.success("Transacao atualizada");
+      await fetchTransactionsByMonth(selectedYearMonth);
+    } catch {
+      toast.error("Nao foi possivel atualizar a transacao");
+    }
+  };
+
   return (
     <AppLayout>
       <div className="space-y-6 animate-fade-in">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-semibold text-foreground tracking-tight">Gastos</h1>
-            <p className="text-muted-foreground">Registre e acompanhe todas as suas transacoes</p>
+            <h1 className="text-2xl font-semibold text-foreground tracking-tight">
+              Transacoes
+            </h1>
+            <p className="text-muted-foreground">
+              Registre e acompanhe todas as suas transacoes
+            </p>
           </div>
           <Button className="gap-2" onClick={() => setModalOpen(true)}>
             <Plus className="w-4 h-4" />
@@ -137,7 +191,7 @@ const Expenses = () => {
           </Button>
         </div>
 
-        <AddExpenseModal
+        <AddTransactionModal
           open={modalOpen}
           onOpenChange={setModalOpen}
           onCreateTransaction={handleCreateTransaction}
@@ -153,7 +207,10 @@ const Expenses = () => {
               onChange={(e) => setSearch(e.target.value)}
             />
           </div>
-          <Select value={selectedYearMonth} onValueChange={setSelectedYearMonth}>
+          <Select
+            value={selectedYearMonth}
+            onValueChange={setSelectedYearMonth}
+          >
             <SelectTrigger className="w-[220px]">
               <SelectValue placeholder="Mes" />
             </SelectTrigger>
@@ -177,7 +234,7 @@ const Expenses = () => {
                 <p className="text-sm text-muted-foreground">Total Saidas</p>
                 <p className="text-xl font-semibold text-foreground">
                   R${" "}
-                  {totalTransactionsOut.toLocaleString("pt-BR", {
+                  {totalOut.toLocaleString("pt-BR", {
                     minimumFractionDigits: 2,
                   })}
                 </p>
@@ -192,14 +249,22 @@ const Expenses = () => {
               <div>
                 <p className="text-sm text-muted-foreground">Total Entradas</p>
                 <p className="text-xl font-semibold text-foreground">
-                  R$ {totalIncome.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
+                  R${" "}
+                  {totalIn.toLocaleString("pt-BR", {
+                    minimumFractionDigits: 2,
+                  })}
                 </p>
               </div>
             </div>
           </div>
           <div className="p-5 rounded-xl bg-card border border-border shadow-card">
             <p className="text-sm text-muted-foreground">Saldo do Periodo</p>
-            <p className={cn("text-xl font-semibold", balance >= 0 ? "text-success" : "text-destructive")}>
+            <p
+              className={cn(
+                "text-xl font-semibold",
+                balance >= 0 ? "text-success" : "text-destructive",
+              )}
+            >
               R$ {balance.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
             </p>
           </div>
@@ -209,11 +274,21 @@ const Expenses = () => {
           <Table>
             <TableHeader>
               <TableRow className="hover:bg-transparent border-border">
-                <TableHead className="text-muted-foreground font-medium">Descricao</TableHead>
-                <TableHead className="text-muted-foreground font-medium">Categoria</TableHead>
-                <TableHead className="text-muted-foreground font-medium">Valor</TableHead>
-                <TableHead className="text-muted-foreground font-medium">Data</TableHead>
-                <TableHead className="text-muted-foreground font-medium">Pagamento</TableHead>
+                <TableHead className="text-muted-foreground font-medium">
+                  Descricao
+                </TableHead>
+                <TableHead className="text-muted-foreground font-medium">
+                  Categoria
+                </TableHead>
+                <TableHead className="text-muted-foreground font-medium">
+                  Valor
+                </TableHead>
+                <TableHead className="text-muted-foreground font-medium">
+                  Data
+                </TableHead>
+                <TableHead className="text-muted-foreground font-medium">
+                  Pagamento
+                </TableHead>
                 <TableHead className="text-muted-foreground font-medium w-[60px]"></TableHead>
               </TableRow>
             </TableHeader>
@@ -273,11 +348,17 @@ const Expenses = () => {
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
-                        <DropdownMenuItem className="gap-2">
+                        <DropdownMenuItem
+                          className="gap-2"
+                          onClick={() => handleEditTransaction(transaction)}
+                        >
                           <Pencil className="w-4 h-4" />
                           Editar
                         </DropdownMenuItem>
-                        <DropdownMenuItem className="gap-2 text-destructive">
+                        <DropdownMenuItem
+                          className="gap-2 text-destructive"
+                          onClick={() => handleDeleteTransaction(transaction.id)}
+                        >
                           <Trash2 className="w-4 h-4" />
                           Excluir
                         </DropdownMenuItem>
@@ -289,8 +370,11 @@ const Expenses = () => {
 
               {filteredTransactions.length === 0 && (
                 <TableRow className="border-border">
-                  <TableCell colSpan={6} className="text-center text-muted-foreground py-8">
-                    Nenhum lancamento encontrado para este mes.
+                  <TableCell
+                    colSpan={6}
+                    className="text-center text-muted-foreground py-8"
+                  >
+                    Nenhuma transacao encontrada para este mes.
                   </TableCell>
                 </TableRow>
               )}
@@ -302,4 +386,4 @@ const Expenses = () => {
   );
 };
 
-export default Expenses;
+export default Transaction;
