@@ -9,6 +9,8 @@ import RecurringExpenses from "./pages/RecurringExpenses";
 import CreditCards from "./pages/CreditCards";
 import Reports from "./pages/Reports";
 import Settings from "./pages/Settings";
+import Landing from "./pages/Landing";
+import Login from "./pages/Login";
 import NotFound from "./pages/NotFound";
 import Landing from "./pages/Landing";
 import Login from "./pages/Login";

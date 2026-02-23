@@ -66,7 +66,8 @@ const RecurringExpenses = () => {
   );
 
   const activeCount = useMemo(
-    () => recurringExpenses.filter((expense) => expense.status === "active").length,
+    () =>
+      recurringExpenses.filter((expense) => expense.status === "active").length,
     [recurringExpenses],
   );
 
@@ -81,7 +82,10 @@ const RecurringExpenses = () => {
     [recurringExpenses],
   );
 
-  const handleToggleStatus = async (expenseId: string, status: "active" | "paused") => {
+  const handleToggleStatus = async (
+    expenseId: string,
+    status: "active" | "paused",
+  ) => {
     try {
       await toggleRecurringExpenseStatus(expenseId, status);
       toast.success(status === "active" ? "Gasto pausado" : "Gasto ativado");
@@ -112,6 +116,7 @@ const RecurringExpenses = () => {
             </p>
           </div>
           <Button className="gap-2" onClick={() => setModalOpen(true)}>
+          <Button className="gap-2" onClick={() => setModalOpen(true)}>
             <Plus className="w-4 h-4" />
             Adicionar Recorrente
           </Button>
@@ -135,11 +140,17 @@ const RecurringExpenses = () => {
           </div>
           <div className="p-5 rounded-xl bg-card border border-border shadow-card">
             <p className="text-sm text-muted-foreground mb-1">Ativos</p>
-            <p className="text-2xl font-semibold text-foreground">{activeCount}</p>
+            <p className="text-2xl font-semibold text-foreground">
+              {activeCount}
+            </p>
           </div>
           <div className="p-5 rounded-xl bg-card border border-border shadow-card">
-            <p className="text-sm text-muted-foreground mb-1">Vencendo em Breve</p>
-            <p className="text-2xl font-semibold text-warning">{dueSoonCount}</p>
+            <p className="text-sm text-muted-foreground mb-1">
+              Vencendo em Breve
+            </p>
+            <p className="text-2xl font-semibold text-warning">
+              {dueSoonCount}
+            </p>
           </div>
         </div>
 
@@ -148,9 +159,7 @@ const RecurringExpenses = () => {
             <TableHeader>
               <TableRow className="hover:bg-transparent border-border">
                 <TableHead className="text-muted-foreground font-medium">Nome</TableHead>
-                <TableHead className="text-muted-foreground font-medium">
-                  Categoria
-                </TableHead>
+                <TableHead className="text-muted-foreground font-medium">Categoria</TableHead>
                 <TableHead className="text-muted-foreground font-medium">Valor</TableHead>
                 <TableHead className="text-muted-foreground font-medium">
                   Frequencia
@@ -165,7 +174,8 @@ const RecurringExpenses = () => {
             <TableBody>
               {recurringExpenses.map((expense) => {
                 const daysUntilDue = Math.ceil(
-                  (expense.nextDueDate.getTime() - Date.now()) / (1000 * 60 * 60 * 24),
+                  (expense.nextDueDate.getTime() - Date.now()) /
+                    (1000 * 60 * 60 * 24),
                 );
 
                 return (
@@ -178,7 +188,9 @@ const RecurringExpenses = () => {
                         )}
                       </div>
                     </TableCell>
-                    <TableCell className="text-muted-foreground">{expense.category}</TableCell>
+                    <TableCell className="text-muted-foreground">
+                      {expense.category}
+                    </TableCell>
                     <TableCell className="font-medium text-foreground">
                       R${" "}
                       {expense.amount.toLocaleString("pt-BR", {
@@ -186,7 +198,8 @@ const RecurringExpenses = () => {
                       })}
                     </TableCell>
                     <TableCell className="text-muted-foreground">
-                      {frequencyLabelMap[expense.frequency] ?? expense.frequency}
+                      {frequencyLabelMap[expense.frequency] ??
+                        expense.frequency}
                     </TableCell>
                     <TableCell>
                       <span
@@ -200,7 +213,9 @@ const RecurringExpenses = () => {
                     </TableCell>
                     <TableCell>
                       <Badge
-                        variant={expense.status === "active" ? "default" : "secondary"}
+                        variant={
+                          expense.status === "active" ? "default" : "secondary"
+                        }
                         className={cn(
                           expense.status === "active"
                             ? "bg-success-soft text-success border-0"
@@ -213,7 +228,11 @@ const RecurringExpenses = () => {
                     <TableCell>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon" className="h-8 w-8">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8"
+                          >
                             <MoreHorizontal className="w-4 h-4" />
                           </Button>
                         </DropdownMenuTrigger>
@@ -224,7 +243,9 @@ const RecurringExpenses = () => {
                           </DropdownMenuItem>
                           <DropdownMenuItem
                             className="gap-2"
-                            onClick={() => handleToggleStatus(expense.id, expense.status)}
+                            onClick={() =>
+                              handleToggleStatus(expense.id, expense.status)
+                            }
                           >
                             <Pause className="w-4 h-4" />
                             {expense.status === "active" ? "Pausar" : "Ativar"}
@@ -245,7 +266,10 @@ const RecurringExpenses = () => {
 
               {!loading && recurringExpenses.length === 0 && (
                 <TableRow className="border-border">
-                  <TableCell colSpan={7} className="text-center text-muted-foreground py-8">
+                  <TableCell
+                    colSpan={7}
+                    className="text-center text-muted-foreground py-8"
+                  >
                     Nenhum gasto recorrente encontrado.
                   </TableCell>
                 </TableRow>
