@@ -1,3 +1,5 @@
+import { RecurringExpense } from "./recurring-expense";
+
 export interface User {
   uid: string;
   name: string;
@@ -5,4 +7,5 @@ export interface User {
   picture: string;
   createdAt: Date;
   updatedAt: Date;
+  recurringExpenses?: RecurringExpense[];
 }

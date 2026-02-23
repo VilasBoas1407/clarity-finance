@@ -9,9 +9,8 @@ import {
   User as FirebaseUser,
 } from "firebase/auth";
 import { User } from "@/types/user";
-import { auth, provider, db } from "../lib/firebase";
+import { auth, provider } from "../lib/firebase";
 import { useUser } from "@/hooks/use-user";
-import { collection, getDocs, query, where } from "firebase/firestore";
 
 type AuthContextType = {
   firebaseUser: FirebaseUser | null;
@@ -31,16 +30,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
-      console.log("Auth state changed:", firebaseUser?.email);
-      setFirebaseUser(firebaseUser);
+    const unsubscribe = onAuthStateChanged(auth, async (nextFirebaseUser) => {
+      setFirebaseUser(nextFirebaseUser);
 
-      if (firebaseUser) {
-        console.log("Loading or creating user:", firebaseUser.email);
-        await loadOrCreateUser(firebaseUser);
+      try {
+        if (nextFirebaseUser) {
+          await loadOrCreateUser(nextFirebaseUser);
+        }
+      } catch (error) {
+        console.error("Error on auth state sync:", error);
+      } finally {
+        setLoading(false);
       }
-
-      setLoading(false);
     });
 
     return () => unsubscribe();
@@ -48,18 +49,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const loginWithGoogle = async () => {
     try {
+      setLoading(true);
       const result = await signInWithPopup(auth, provider);
-      console.log("Login successful:", result.user.email);
+      await loadOrCreateUser(result.user);
       navigate("/dashboard");
     } catch (error) {
       console.error("Login error:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
   const logout = async () => {
     try {
       await signOut(auth);
-      console.log("Logout successful");
     } catch (error) {
       console.error("Logout error:", error);
     }

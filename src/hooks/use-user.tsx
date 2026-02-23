@@ -1,12 +1,12 @@
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { db } from "../lib/firebase";
-import { doc, getDoc, setDoc, Timestamp } from "firebase/firestore";
+import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
 import { User } from "@/types/user";
 
 export function useUser() {
   const [user, setUser] = useState<User | null>(null);
 
-  const loadOrCreateUser = async (firebaseUser) => {
+  const loadOrCreateUser = useCallback(async (firebaseUser) => {
     try {
       const uid = firebaseUser.uid;
       const userRef = doc(db, "users", uid);
@@ -15,40 +15,26 @@ export function useUser() {
       if (!snapshot.exists()) {
         const newUser = {
           uid,
-          name: firebaseUser.displayName || "Usuário Sem Nome",
+          name: firebaseUser.displayName || "Usuario Sem Nome",
           email: firebaseUser.email || "",
-          createdAt: new Date(),
-          updatedAt: new Date(),
+          createdAt: serverTimestamp(),
+          updatedAt: serverTimestamp(),
           picture: firebaseUser.photoURL || "",
-        } as User;
+        };
 
         await setDoc(userRef, newUser);
-        setUser(newUser);
+        const createdSnapshot = await getDoc(userRef);
+        setUser(createdSnapshot.data() as User);
         return;
       }
 
-      parseUserData(snapshot);
+      const rawUser = snapshot.data() as User;
+      setUser(rawUser);
     } catch (error) {
-      console.error("Erro ao carregar/criar usuário:", error);
+      console.error("Erro ao carregar/criar usuario:", error);
+      throw error;
     }
-  };
-
-  const parseUserData = (snapshot) => {
-    const rawUser = snapshot.data();
-
-    let relationshipDate = null;
-
-    if (rawUser.relationshipStartDate instanceof Timestamp) {
-      relationshipDate = rawUser.relationshipStartDate.toDate();
-    }
-
-    const parsedUser = {
-      ...rawUser,
-      relationshipStartDate: relationshipDate,
-    } as User;
-
-    setUser(parsedUser);
-  };
+  }, []);
 
   return {
     user,

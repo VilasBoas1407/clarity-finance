@@ -22,7 +22,7 @@ interface NavItem {
 }
 
 const mainNavItems: NavItem[] = [
-  { title: "Dashboard", url: "/", icon: LayoutDashboard },
+  { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
   { title: "Gastos", url: "/expenses", icon: Receipt },
   { title: "Recorrentes", url: "/recurring", icon: Repeat },
   { title: "Cartões", url: "/cards", icon: CreditCard },
