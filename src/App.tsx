@@ -12,8 +12,6 @@ import Settings from "./pages/Settings";
 import Landing from "./pages/Landing";
 import Login from "./pages/Login";
 import NotFound from "./pages/NotFound";
-import Landing from "./pages/Landing";
-import Login from "./pages/Login";
 import { AuthProvider } from "./context/auth-context";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 

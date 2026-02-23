@@ -116,7 +116,6 @@ const RecurringExpenses = () => {
             </p>
           </div>
           <Button className="gap-2" onClick={() => setModalOpen(true)}>
-          <Button className="gap-2" onClick={() => setModalOpen(true)}>
             <Plus className="w-4 h-4" />
             Adicionar Recorrente
           </Button>
@@ -158,16 +157,24 @@ const RecurringExpenses = () => {
           <Table>
             <TableHeader>
               <TableRow className="hover:bg-transparent border-border">
-                <TableHead className="text-muted-foreground font-medium">Nome</TableHead>
-                <TableHead className="text-muted-foreground font-medium">Categoria</TableHead>
-                <TableHead className="text-muted-foreground font-medium">Valor</TableHead>
+                <TableHead className="text-muted-foreground font-medium">
+                  Nome
+                </TableHead>
+                <TableHead className="text-muted-foreground font-medium">
+                  Categoria
+                </TableHead>
+                <TableHead className="text-muted-foreground font-medium">
+                  Valor
+                </TableHead>
                 <TableHead className="text-muted-foreground font-medium">
                   Frequencia
                 </TableHead>
                 <TableHead className="text-muted-foreground font-medium">
                   Proximo Venc.
                 </TableHead>
-                <TableHead className="text-muted-foreground font-medium">Status</TableHead>
+                <TableHead className="text-muted-foreground font-medium">
+                  Status
+                </TableHead>
                 <TableHead className="text-muted-foreground font-medium w-[60px]"></TableHead>
               </TableRow>
             </TableHeader>
