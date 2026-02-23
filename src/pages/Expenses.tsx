@@ -25,6 +25,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Plus, Search, Filter, MoreHorizontal, Pencil, Trash2, TrendingUp, TrendingDown } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useState } from "react";
+import { AddExpenseModal } from "@/components/expenses/AddExpenseModal";
 
 interface Expense {
   id: string;
@@ -48,6 +50,8 @@ const expenses: Expense[] = [
 ];
 
 const Expenses = () => {
+  const [modalOpen, setModalOpen] = useState(false);
+
   return (
     <AppLayout>
       <div className="space-y-6 animate-fade-in">
@@ -61,11 +65,13 @@ const Expenses = () => {
               Registre e acompanhe todas as suas transações
             </p>
           </div>
-          <Button className="gap-2">
+          <Button className="gap-2" onClick={() => setModalOpen(true)}>
             <Plus className="w-4 h-4" />
             Novo Lançamento
           </Button>
         </div>
+
+        <AddExpenseModal open={modalOpen} onOpenChange={setModalOpen} />
 
         {/* Filters */}
         <div className="flex flex-col sm:flex-row gap-3">
