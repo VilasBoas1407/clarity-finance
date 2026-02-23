@@ -17,6 +17,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Plus, MoreHorizontal, Pause, Pencil, Trash2, AlertCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useState } from "react";
+import { AddRecurringModal } from "@/components/recurring/AddRecurringModal";
 
 interface RecurringExpense {
   id: string;
@@ -97,6 +99,8 @@ const totalMonthly = recurringExpenses
   .reduce((acc, e) => acc + e.amount, 0);
 
 const RecurringExpenses = () => {
+  const [modalOpen, setModalOpen] = useState(false);
+
   return (
     <AppLayout>
       <div className="space-y-6 animate-fade-in">
@@ -110,11 +114,13 @@ const RecurringExpenses = () => {
               Gerencie suas assinaturas e despesas fixas
             </p>
           </div>
-          <Button className="gap-2">
+          <Button className="gap-2" onClick={() => setModalOpen(true)}>
             <Plus className="w-4 h-4" />
             Adicionar Recorrente
           </Button>
         </div>
+
+        <AddRecurringModal open={modalOpen} onOpenChange={setModalOpen} />
 
         {/* Summary cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
