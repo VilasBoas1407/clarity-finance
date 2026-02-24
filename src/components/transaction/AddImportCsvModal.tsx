@@ -14,10 +14,12 @@ export function ImportCsvModal({
   open,
   onOpenChange,
   onImportCsv,
+  importing = false,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onImportCsv: (file: File) => Promise<void>;
+  importing?: boolean;
 }) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -30,13 +32,13 @@ export function ImportCsvModal({
           </DialogDescription>
         </DialogHeader>
         <form
-          onSubmit={(e) => {
+          onSubmit={async (e) => {
             e.preventDefault();
             const fileInput = e.currentTarget.elements.namedItem(
               "csvFile",
             ) as HTMLInputElement;
             if (fileInput.files && fileInput.files[0]) {
-              onImportCsv(fileInput.files[0]);
+              await onImportCsv(fileInput.files[0]);
             }
           }}
           className="grid gap-4 py-4"
@@ -48,11 +50,14 @@ export function ImportCsvModal({
               id="csvFile"
               name="csvFile"
               accept=".csv"
+              disabled={importing}
               required
             />
           </div>
           <DialogFooter>
-            <Button type="submit">Importar</Button>
+            <Button type="submit" disabled={importing}>
+              {importing ? "Importando..." : "Importar"}
+            </Button>
           </DialogFooter>
         </form>
       </DialogContent>

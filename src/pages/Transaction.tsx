@@ -39,6 +39,150 @@ import { useTransactions } from "@/hooks/use-transactions";
 import { toast } from "sonner";
 import { Transaction as TransactionType } from "@/types/transaction";
 import { ImportCsvModal } from "@/components/transaction/AddImportCsvModal";
+import { CATEGORIES, PAYMENT_METHODS } from "@/shared/constants";
+
+type CsvRow = Record<string, string>;
+
+const normalizeHeader = (value: string) =>
+  value
+    .trim()
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/\s+/g, "")
+    .replace(/[^a-z0-9]/g, "");
+
+const splitCsvLine = (line: string, separator: "," | ";") => {
+  const values: string[] = [];
+  let current = "";
+  let inQuotes = false;
+
+  for (let i = 0; i < line.length; i += 1) {
+    const char = line[i];
+    const nextChar = line[i + 1];
+
+    if (char === '"') {
+      if (inQuotes && nextChar === '"') {
+        current += '"';
+        i += 1;
+      } else {
+        inQuotes = !inQuotes;
+      }
+      continue;
+    }
+
+    if (char === separator && !inQuotes) {
+      values.push(current.trim());
+      current = "";
+      continue;
+    }
+
+    current += char;
+  }
+
+  values.push(current.trim());
+  return values;
+};
+
+const parseCsv = (csvText: string): CsvRow[] => {
+  const lines = csvText
+    .replace(/^\uFEFF/, "")
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter(Boolean);
+
+  if (lines.length < 2) return [];
+
+  const commaHeaders = splitCsvLine(lines[0], ",");
+  const semicolonHeaders = splitCsvLine(lines[0], ";");
+  const separator: "," | ";" =
+    semicolonHeaders.length > commaHeaders.length ? ";" : ",";
+
+  const headers = splitCsvLine(lines[0], separator).map(normalizeHeader);
+
+  return lines.slice(1).map((line) => {
+    const values = splitCsvLine(line, separator);
+    return headers.reduce<CsvRow>((acc, header, index) => {
+      acc[header] = values[index]?.trim() ?? "";
+      return acc;
+    }, {});
+  });
+};
+
+const parseCsvAmount = (rawAmount: string) => {
+  const sanitized = rawAmount
+    .replace(/\s+/g, "")
+    .replace(/r\$/gi, "")
+    .replace(/\./g, "")
+    .replace(",", ".");
+
+  const parsed = Number(sanitized);
+  if (Number.isNaN(parsed)) return null;
+  return parsed;
+};
+
+const parseCsvDate = (rawDate: string) => {
+  const value = rawDate.trim();
+  if (!value) return null;
+
+  const isoLike = value.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (isoLike) {
+    const [_, year, month, day] = isoLike;
+    const parsed = new Date(Number(year), Number(month) - 1, Number(day));
+    return Number.isNaN(parsed.getTime()) ? null : parsed;
+  }
+
+  const brLike = value.match(/^(\d{2})[/-](\d{2})[/-](\d{4})$/);
+  if (brLike) {
+    const [_, day, month, year] = brLike;
+    const parsed = new Date(Number(year), Number(month) - 1, Number(day));
+    return Number.isNaN(parsed.getTime()) ? null : parsed;
+  }
+
+  const native = new Date(value);
+  return Number.isNaN(native.getTime()) ? null : native;
+};
+
+const getRowValue = (row: CsvRow, aliases: string[]) => {
+  for (const alias of aliases) {
+    const value = row[normalizeHeader(alias)];
+    if (value !== undefined && value !== "") {
+      return value;
+    }
+  }
+  return "";
+};
+
+const mapPaymentMethod = (rawValue: string) => {
+  const normalized = normalizeHeader(rawValue);
+
+  const mapper: Record<string, string> = {
+    cartao: "cartao",
+    credito: "cartao",
+    debito: "debito",
+    pix: "pix",
+    dinheiro: "dinheiro",
+    transferencia: "transferencia",
+    ted: "transferencia",
+    doc: "transferencia",
+  };
+
+  return mapper[normalized] ?? PAYMENT_METHODS[0].value;
+};
+
+const mapType = (rawValue: string, amount: number): "income" | "expense" => {
+  const normalized = normalizeHeader(rawValue);
+
+  if (["receita", "entrada", "income", "ganho"].includes(normalized)) {
+    return "income";
+  }
+
+  if (["despesa", "saida", "expense", "gasto"].includes(normalized)) {
+    return "expense";
+  }
+
+  return amount < 0 ? "expense" : "income";
+};
 
 const buildLast12Months = () => {
   const months: { value: string; label: string }[] = [];
@@ -68,6 +212,7 @@ const paymentMethodLabelMap: Record<string, string> = {
 const Transaction = () => {
   const [modalTransactionOpen, setmodalTransactionOpen] = useState(false);
   const [modalImportCsvOpen, setModalImportCsvOpen] = useState(false);
+  const [importingCsv, setImportingCsv] = useState(false);
   const [search, setSearch] = useState("");
   const monthOptions = useMemo(() => buildLast12Months(), []);
   const [selectedYearMonth, setSelectedYearMonth] = useState(
@@ -175,6 +320,84 @@ const Transaction = () => {
     }
   };
 
+  const handleImportCsv = async (file: File) => {
+    setImportingCsv(true);
+    try {
+      const csvText = await file.text();
+      const rows = parseCsv(csvText);
+
+      if (rows.length === 0) {
+        toast.error("CSV vazio ou sem linhas validas");
+        return;
+      }
+
+      let importedCount = 0;
+      let invalidCount = 0;
+
+      for (const row of rows) {
+        const rawDescription = getRowValue(row, [
+          "descricao",
+          "description",
+          "historico",
+        ]);
+        const rawCategory = getRowValue(row, ["categoria", "category"]);
+        const rawAmount = getRowValue(row, ["valor", "amount"]);
+        const rawDate = getRowValue(row, ["data", "date"]);
+        const rawPaymentMethod = getRowValue(row, [
+          "pagamento",
+          "paymentmethod",
+          "metodo",
+          "metodopagamento",
+        ]);
+        const rawType = getRowValue(row, ["tipo", "type"]);
+
+        const description = rawDescription.trim();
+        const amount = parseCsvAmount(rawAmount);
+        const date = parseCsvDate(rawDate);
+
+        if (!description || amount === null || !date) {
+          invalidCount += 1;
+          continue;
+        }
+
+        const type = mapType(rawType, amount);
+        const category = rawCategory.trim() || CATEGORIES[CATEGORIES.length - 1];
+        const paymentMethod = mapPaymentMethod(rawPaymentMethod);
+        const normalizedAmount =
+          type === "expense" ? -Math.abs(amount) : Math.abs(amount);
+
+        await addTransaction({
+          description,
+          category,
+          amount: normalizedAmount,
+          date,
+          paymentMethod,
+          type,
+        });
+
+        importedCount += 1;
+      }
+
+      await fetchTransactionsByMonth(selectedYearMonth);
+
+      if (importedCount > 0) {
+        toast.success(
+          `${importedCount} transacao(oes) importada(s)${
+            invalidCount > 0 ? `, ${invalidCount} linha(s) ignorada(s)` : ""
+          }`,
+        );
+        setModalImportCsvOpen(false);
+      } else {
+        toast.error("Nenhuma linha valida encontrada para importar");
+      }
+    } catch (error) {
+      console.error("Erro ao importar CSV:", error);
+      toast.error("Nao foi possivel importar o CSV");
+    } finally {
+      setImportingCsv(false);
+    }
+  };
+
   return (
     <AppLayout>
       <div className="space-y-6 animate-fade-in">
@@ -214,7 +437,8 @@ const Transaction = () => {
         <ImportCsvModal
           open={modalImportCsvOpen}
           onOpenChange={setModalImportCsvOpen}
-          onImportCsv={async (file) => {}}
+          onImportCsv={handleImportCsv}
+          importing={importingCsv}
         />
 
         <div className="flex flex-col sm:flex-row gap-3">
