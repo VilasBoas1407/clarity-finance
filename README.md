@@ -1,89 +1,158 @@
-# Clarity Finance
+# 💰 Clarity Finance
 
-Aplicacao web para controle financeiro pessoal, com autenticacao Google e persistencia no Firebase.
+> Aplicação web para controle financeiro pessoal com autenticação Google e persistência em tempo real no Firebase.
 
-## Stack
+![React](https://img.shields.io/badge/React-18-61DAFB?logo=react&logoColor=white)
+![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript&logoColor=white)
+![Firebase](https://img.shields.io/badge/Firebase-Auth%20%2B%20Firestore-FFCA28?logo=firebase&logoColor=black)
+![Vite](https://img.shields.io/badge/Vite-646CFF?logo=vite&logoColor=white)
 
-- React 18 + TypeScript
-- Vite
-- Tailwind CSS + shadcn/ui
-- Firebase Auth (Google)
-- Cloud Firestore
-- React Router
-- Recharts
+![alt text](image.png)
+---
 
-## Funcionalidades
+## ✨ Funcionalidades
 
-- Login com Google
-- Dashboard com indicadores financeiros
-- Cadastro e listagem de transações por mes
-- Cadastro e listagem de gastos recorrentes
-- Edicao/exclusao de transações
-- Rotas protegidas por autenticacao
+- 🔐 **Login com Google** via Firebase Auth
+- 📊 **Dashboard** com indicadores financeiros consolidados
+- 💸 **Transações** — cadastro, listagem, edição e exclusão com filtro mensal
+- 🔁 **Gastos recorrentes** — gestão de despesas fixas
+- 🛡️ **Rotas protegidas** por autenticação
+- 📈 **Gráficos** interativos com Recharts
 
-## Estrutura de dados (Firestore)
+---
 
-Colecoes por usuario:
+## 🛠️ Stack
 
-- `users/{uid}`
-- `users/{uid}/transactions/{transactionId}`
-- `users/{uid}/recurringExpenses/{expenseId}`
+| Categoria | Tecnologia |
+|---|---|
+| Frontend | React 18 + TypeScript |
+| Build | Vite |
+| Estilização | Tailwind CSS + shadcn/ui |
+| Autenticação | Firebase Auth (Google) |
+| Banco de dados | Cloud Firestore |
+| Roteamento | React Router |
+| Gráficos | Recharts |
+| Testes | Vitest |
 
-Campos importantes em `transactions`:
+---
 
-- `description`, `category`, `amount`, `type`, `paymentMethod`, `date`
-- `yearMonth` (formato `YYYY-MM`, usado para filtro mensal)
-- `createdAt`, `updatedAt`, `userId`
+## 🚀 Como rodar localmente
 
-## Requisitos
+### Pré-requisitos
 
 - Node.js 18+
 - npm 9+
-- Projeto Firebase com Auth e Firestore habilitados
+- Projeto Firebase com **Authentication** e **Firestore** habilitados
 
-## Configuracao
+### Passo a passo
 
-1. Instale dependencias:
+**1. Clone o repositório**
+
+```bash
+git clone https://github.com/VilasBoas1407/clarity-finance.git
+cd clarity-finance
+```
+
+**2. Instale as dependências**
 
 ```bash
 npm install
 ```
 
-2. Configure variaveis de ambiente:
+**3. Configure as variáveis de ambiente**
 
-- Copie `.env.example` para `.env`
-- Preencha com as credenciais do seu projeto Firebase
+Copie o arquivo de exemplo e preencha com as credenciais do seu projeto Firebase:
 
-Variaveis usadas:
+```bash
+cp .env.example .env
+```
 
-- `VITE_FIREBASE_API_KEY`
-- `VITE_FIREBASE_AUTH_DOMAIN`
-- `VITE_FIREBASE_PROJECT_ID`
-- `VITE_FIREBASE_STORAGE_BUCKET`
-- `VITE_FIREBASE_MESSAGING_SENDER_ID`
-- `VITE_FIREBASE_APP_ID`
-- `VITE_FIREBASE_MEASUREMENT_ID`
+| Variável | Descrição |
+|---|---|
+| `VITE_FIREBASE_API_KEY` | Chave de API do Firebase |
+| `VITE_FIREBASE_AUTH_DOMAIN` | Domínio de autenticação |
+| `VITE_FIREBASE_PROJECT_ID` | ID do projeto |
+| `VITE_FIREBASE_STORAGE_BUCKET` | Bucket de storage |
+| `VITE_FIREBASE_MESSAGING_SENDER_ID` | ID do sender |
+| `VITE_FIREBASE_APP_ID` | ID do app |
+| `VITE_FIREBASE_MEASUREMENT_ID` | ID de analytics (opcional) |
 
-3. Inicie o projeto:
+**4. Inicie o servidor de desenvolvimento**
 
 ```bash
 npm run dev
 ```
 
-## Scripts
+Acesse `http://localhost:5173` no seu navegador.
 
-- `npm run dev`: ambiente de desenvolvimento
-- `npm run build`: build de producao
-- `npm run preview`: preview do build
-- `npm run lint`: lint
-- `npm run test`: testes (Vitest)
-- `npm run test:watch`: testes em modo watch
+---
 
-## Regras de seguranca (Firestore)
+## 📜 Scripts disponíveis
 
-Exemplo minimo para acesso por usuario autenticado ao proprio documento e subcolecoes:
+```bash
+npm run dev          # Servidor de desenvolvimento
+npm run build        # Build de produção
+npm run preview      # Preview do build gerado
+npm run lint         # Análise estática de código
+npm run test         # Executa os testes (Vitest)
+npm run test:watch   # Testes em modo watch
+```
 
-```txt
+---
+
+## 🗂️ Estrutura de dados (Firestore)
+
+Os dados são organizados por usuário autenticado:
+
+```
+users/
+└── {uid}/
+    ├── (documento do usuário)
+    ├── transactions/
+    │   └── {transactionId}
+    └── recurringExpenses/
+        └── {expenseId}
+```
+
+### Campos de uma `transaction`
+
+| Campo | Tipo | Descrição |
+|---|---|---|
+| `description` | string | Descrição da transação |
+| `category` | string | Categoria (ex: alimentação, saúde) |
+| `amount` | number | Valor |
+| `type` | string | `income` ou `expense` |
+| `paymentMethod` | string | Método de pagamento |
+| `date` | timestamp | Data da transação |
+| `yearMonth` | string | Formato `YYYY-MM` — usado para filtro mensal |
+| `createdAt` | timestamp | Data de criação |
+| `updatedAt` | timestamp | Última atualização |
+| `userId` | string | UID do usuário dono |
+
+> ⚠️ O campo `yearMonth` é obrigatório para que a transação apareça no filtro mensal do dashboard.
+
+---
+
+## 🗺️ Rotas da aplicação
+
+| Rota | Descrição |
+|---|---|
+| `/` | Landing page |
+| `/login` | Página de login |
+| `/dashboard` | Dashboard principal |
+| `/transactions` | Listagem e gestão de transações |
+| `/recurring` | Gastos recorrentes |
+| `/cards` | Cartões |
+| `/reports` | Relatórios |
+| `/settings` | Configurações |
+
+---
+
+## 🔒 Regras de segurança (Firestore)
+
+Configure as regras abaixo no console do Firebase para garantir que cada usuário acesse apenas seus próprios dados:
+
+```
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
@@ -105,16 +174,10 @@ service cloud.firestore {
 }
 ```
 
-## Rotas principais
+> ❌ Se você receber o erro `Missing or insufficient permissions`, verifique se as regras acima estão aplicadas corretamente no seu projeto Firebase.
 
-- `/` Landing
-- `/login` Login
-- `/dashboard` Dashboard
-- `/transactions` transações
-- `/recurring` Gastos recorrentes
-- `/cards`, `/reports`, `/settings`
+---
 
-## Observacoes
+## 📄 Licença
 
-- A tela de transações filtra por `yearMonth`; se esse campo nao existir no documento, ele nao aparece no filtro mensal.
-- Se ocorrer `Missing or insufficient permissions`, revise as regras do Firestore.
+Este projeto está sob a licença MIT.
