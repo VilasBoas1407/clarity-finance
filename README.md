@@ -8,6 +8,7 @@
 ![Vite](https://img.shields.io/badge/Vite-646CFF?logo=vite&logoColor=white)
 
 ![alt text](image.png)
+![alt text](image-1.png)
 ---
 
 ## ✨ Funcionalidades
