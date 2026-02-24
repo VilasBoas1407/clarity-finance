@@ -38,6 +38,7 @@ import { AddTransactionModal } from "@/components/transaction/AddTransactionModa
 import { useTransactions } from "@/hooks/use-transactions";
 import { toast } from "sonner";
 import { Transaction as TransactionType } from "@/types/transaction";
+import { ImportCsvModal } from "@/components/transaction/AddImportCsvModal";
 
 const buildLast12Months = () => {
   const months: { value: string; label: string }[] = [];
@@ -65,7 +66,8 @@ const paymentMethodLabelMap: Record<string, string> = {
 };
 
 const Transaction = () => {
-  const [modalOpen, setModalOpen] = useState(false);
+  const [modalTransactionOpen, setmodalTransactionOpen] = useState(false);
+  const [modalImportCsvOpen, setModalImportCsvOpen] = useState(false);
   const [search, setSearch] = useState("");
   const monthOptions = useMemo(() => buildLast12Months(), []);
   const [selectedYearMonth, setSelectedYearMonth] = useState(
@@ -135,15 +137,15 @@ const Transaction = () => {
   const handleDeleteTransaction = async (transactionId: string) => {
     try {
       await deleteTransaction(transactionId);
-      toast.success("Transacao excluida");
+      toast.success("Transação excluída");
       await fetchTransactionsByMonth(selectedYearMonth);
     } catch {
-      toast.error("Nao foi possivel excluir a transacao");
+      toast.error("Não foi possível excluir a transação");
     }
   };
 
   const handleEditTransaction = async (transaction: TransactionType) => {
-    const nextDescription = window.prompt("Descricao", transaction.description);
+    const nextDescription = window.prompt("Descrição", transaction.description);
     if (nextDescription === null) return;
 
     const nextAmountInput = window.prompt(
@@ -179,29 +181,47 @@ const Transaction = () => {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-semibold text-foreground tracking-tight">
-              Transacoes
+              Transações
             </h1>
             <p className="text-muted-foreground">
-              Registre e acompanhe todas as suas transacoes
+              Registre e acompanhe todas as suas transações
             </p>
           </div>
-          <Button className="gap-2" onClick={() => setModalOpen(true)}>
-            <Plus className="w-4 h-4" />
-            Novo Lancamento
-          </Button>
+          <div className="flex items-center justify-between space-y-4 sm:space-y-0 sm:space-x-2">
+            <Button
+              className="gap-2"
+              onClick={() => setmodalTransactionOpen(true)}
+            >
+              <Plus className="w-4 h-4" />
+              Novo Lançamento
+            </Button>
+            <Button
+              className="gap-2"
+              onClick={() => setModalImportCsvOpen(true)}
+            >
+              <Plus className="w-4 h-4" />
+              Importa CSV
+            </Button>
+          </div>
         </div>
 
         <AddTransactionModal
-          open={modalOpen}
-          onOpenChange={setModalOpen}
+          open={modalTransactionOpen}
+          onOpenChange={setmodalTransactionOpen}
           onCreateTransaction={handleCreateTransaction}
+        />
+
+        <ImportCsvModal
+          open={modalImportCsvOpen}
+          onOpenChange={setModalImportCsvOpen}
+          onImportCsv={async (file) => {}}
         />
 
         <div className="flex flex-col sm:flex-row gap-3">
           <div className="relative flex-1 max-w-sm">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <Input
-              placeholder="Buscar transacao..."
+              placeholder="Buscar transção..."
               className="pl-10"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
@@ -231,7 +251,7 @@ const Transaction = () => {
                 <TrendingDown className="w-5 h-5" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Total Saidas</p>
+                <p className="text-sm text-muted-foreground">Total Saídas</p>
                 <p className="text-xl font-semibold text-foreground">
                   R${" "}
                   {totalOut.toLocaleString("pt-BR", {
@@ -357,7 +377,9 @@ const Transaction = () => {
                         </DropdownMenuItem>
                         <DropdownMenuItem
                           className="gap-2 text-destructive"
-                          onClick={() => handleDeleteTransaction(transaction.id)}
+                          onClick={() =>
+                            handleDeleteTransaction(transaction.id)
+                          }
                         >
                           <Trash2 className="w-4 h-4" />
                           Excluir

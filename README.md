@@ -16,9 +16,9 @@ Aplicacao web para controle financeiro pessoal, com autenticacao Google e persis
 
 - Login com Google
 - Dashboard com indicadores financeiros
-- Cadastro e listagem de transacoes por mes
+- Cadastro e listagem de transações por mes
 - Cadastro e listagem de gastos recorrentes
-- Edicao/exclusao de transacoes
+- Edicao/exclusao de transações
 - Rotas protegidas por autenticacao
 
 ## Estrutura de dados (Firestore)
@@ -110,11 +110,11 @@ service cloud.firestore {
 - `/` Landing
 - `/login` Login
 - `/dashboard` Dashboard
-- `/transactions` Transacoes
+- `/transactions` transações
 - `/recurring` Gastos recorrentes
 - `/cards`, `/reports`, `/settings`
 
 ## Observacoes
 
-- A tela de transacoes filtra por `yearMonth`; se esse campo nao existir no documento, ele nao aparece no filtro mensal.
+- A tela de transações filtra por `yearMonth`; se esse campo nao existir no documento, ele nao aparece no filtro mensal.
 - Se ocorrer `Missing or insufficient permissions`, revise as regras do Firestore.

@@ -32,8 +32,8 @@ const plans = [
     highlight: false,
   },
   {
-    name: "Pro",
-    price: "R$ 19",
+    name: "Premium",
+    price: "R$ 9,90",
     period: "/mês",
     description: "Para quem quer controle total",
     features: [
@@ -48,8 +48,8 @@ const plans = [
     highlight: true,
   },
   {
-    name: "Família",
-    price: "R$ 29",
+    name: "Família - 5 membros (Em breve)",
+    price: "R$ 19,90",
     period: "/mês",
     description: "Para gerenciar finanças em grupo",
     features: [

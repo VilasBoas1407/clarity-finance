@@ -3,53 +3,67 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Checkbox } from "@/components/ui/checkbox";
 import { DollarSign, Eye, EyeOff, Loader2, ArrowRight } from "lucide-react";
 import { useAuth } from "@/context/auth-context";
-import { GoogleButton } from "@/components/ui/google-button";
 import { FirebaseError } from "firebase/app";
 
-const getFirebaseLoginMessage = (error: unknown) => {
+const getFirebaseRegisterMessage = (error: unknown) => {
   if (error instanceof Error && error.message === "GOOGLE_ACCOUNT_ONLY") {
-    return "Esta conta foi criada com Google. Use \"Login com Google\".";
+    return 'Este e-mail ja foi cadastrado via Google. Use "Login com Google".';
+  }
+
+  if (error instanceof Error && error.message === "EMAIL_ALREADY_REGISTERED") {
+    return "Este e-mail ja possui conta. Faca login para continuar.";
   }
 
   if (!(error instanceof FirebaseError)) {
-    return "Nao foi possivel fazer login. Tente novamente.";
+    return "Nao foi possivel criar a conta. Tente novamente.";
   }
 
   switch (error.code) {
+    case "auth/email-already-in-use":
+      return "Este e-mail ja esta em uso.";
     case "auth/invalid-email":
       return "E-mail invalido.";
-    case "auth/invalid-credential":
-    case "auth/wrong-password":
-      return "E-mail ou senha incorretos.";
-    case "auth/user-not-found":
-      return "Conta nao encontrada.";
+    case "auth/weak-password":
+      return "A senha precisa ter pelo menos 6 caracteres.";
     case "auth/too-many-requests":
       return "Muitas tentativas. Aguarde e tente novamente.";
     default:
-      return "Nao foi possivel fazer login. Tente novamente.";
+      return "Nao foi possivel criar a conta. Tente novamente.";
   }
 };
 
-export default function Login() {
-  const { loginWithEmailPassword } = useAuth();
+export default function Register() {
+  const { registerWithEmailPassword } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [formError, setFormError] = useState<string | null>(null);
-  const [errors, setErrors] = useState<{ email?: string; password?: string }>(
-    {},
-  );
+  const [errors, setErrors] = useState<{
+    name?: string;
+    email?: string;
+    password?: string;
+    confirmPassword?: string;
+  }>({});
 
   const validate = () => {
     const newErrors: typeof errors = {};
-    if (!email) newErrors.email = "E-mail e obrigatorio";
-    else if (!/\S+@\S+\.\S+/.test(email)) newErrors.email = "E-mail invalido";
-    if (!password) newErrors.password = "Senha e obrigatoria";
-    else if (password.length < 6) newErrors.password = "Minimo de 6 caracteres";
+
+    if (!name.trim()) newErrors.name = "Nome é obrigatório";
+    if (!email) newErrors.email = "E-mail é obrigatório";
+    else if (!/\S+@\S+\.\S+/.test(email)) newErrors.email = "E-mail inválido";
+    if (!password) newErrors.password = "Senha é obrigatória";
+    else if (password.length < 6) newErrors.password = "Mínimo de 6 caracteres";
+    if (!confirmPassword) newErrors.confirmPassword = "Confirme sua senha";
+    else if (confirmPassword !== password) {
+      newErrors.confirmPassword = "As senhas não conferem";
+    }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -61,9 +75,9 @@ export default function Login() {
 
     setLoading(true);
     try {
-      await loginWithEmailPassword(email, password);
+      await registerWithEmailPassword(name, email, password);
     } catch (error) {
-      setFormError(getFirebaseLoginMessage(error));
+      setFormError(getFirebaseRegisterMessage(error));
     } finally {
       setLoading(false);
     }
@@ -89,20 +103,18 @@ export default function Login() {
 
         <div className="relative z-10 mb-20">
           <h2 className="text-3xl font-bold text-sidebar-accent-foreground leading-tight mb-4">
-            Tome o controle das suas financas com{" "}
-            <span className="gradient-text">clareza</span>
+            Crie sua conta e comece a organizar suas financas
           </h2>
           <p className="text-sidebar-foreground leading-relaxed max-w-sm">
-            Acompanhe gastos, recorrentes e cartoes em um unico painel. Simples,
-            bonito e poderoso.
+            Tudo em um unico lugar: transações, recorrentes e cartoes.
           </p>
         </div>
 
         <div className="relative z-10 flex items-center gap-6">
           {[
-            { value: "12k+", label: "Usuarios" },
-            { value: "98%", label: "Satisfacao" },
-            { value: "4.9", label: "Avaliacao" },
+            { value: "Sem custo", label: "Plano inicial" },
+            { value: "Rapido", label: "Cadastro simples" },
+            { value: "Seguro", label: "Firebase Auth" },
           ].map((s) => (
             <div key={s.label}>
               <p className="text-lg font-bold text-sidebar-accent-foreground">
@@ -124,15 +136,42 @@ export default function Login() {
               Clarity Finance
             </span>
           </div>
+
           <div className="mb-8">
             <h1 className="text-2xl font-bold text-sidebar-accent-foreground mb-2">
-              Bem-vindo de volta
+              Criar conta
             </h1>
             <p className="text-sidebar-foreground">
-              Entre na sua conta para continuar
+              Preencha os dados para criar seu acesso
             </p>
           </div>
+
           <form onSubmit={handleSubmit} className="space-y-5">
+            <div className="space-y-2">
+              <Label htmlFor="name" className="text-sidebar-accent-foreground">
+                Nome
+              </Label>
+              <Input
+                id="name"
+                type="text"
+                placeholder="Seu nome"
+                value={name}
+                onChange={(e) => {
+                  setName(e.target.value);
+                  setErrors((p) => ({ ...p, name: undefined }));
+                  setFormError(null);
+                }}
+                className={`bg-sidebar-accent border-sidebar-border text-sidebar-accent-foreground placeholder:text-sidebar-muted h-11 ${
+                  errors.name
+                    ? "border-destructive focus-visible:ring-destructive"
+                    : ""
+                }`}
+              />
+              {errors.name && (
+                <p className="text-xs text-destructive">{errors.name}</p>
+              )}
+            </div>
+
             <div className="space-y-2">
               <Label htmlFor="email" className="text-sidebar-accent-foreground">
                 E-mail
@@ -199,19 +238,47 @@ export default function Login() {
               )}
             </div>
 
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Checkbox
-                  id="remember"
-                  className="border-sidebar-border data-[state=checked]:bg-primary data-[state=checked]:border-primary"
+            <div className="space-y-2">
+              <Label
+                htmlFor="confirmPassword"
+                className="text-sidebar-accent-foreground"
+              >
+                Confirmar senha
+              </Label>
+              <div className="relative">
+                <Input
+                  id="confirmPassword"
+                  type={showConfirmPassword ? "text" : "password"}
+                  placeholder="********"
+                  value={confirmPassword}
+                  onChange={(e) => {
+                    setConfirmPassword(e.target.value);
+                    setErrors((p) => ({ ...p, confirmPassword: undefined }));
+                    setFormError(null);
+                  }}
+                  className={`bg-sidebar-accent border-sidebar-border text-sidebar-accent-foreground placeholder:text-sidebar-muted h-11 pr-10 ${
+                    errors.confirmPassword
+                      ? "border-destructive focus-visible:ring-destructive"
+                      : ""
+                  }`}
                 />
-                <Label
-                  htmlFor="remember"
-                  className="text-sm text-sidebar-foreground cursor-pointer"
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-sidebar-foreground hover:text-sidebar-accent-foreground transition-colors"
                 >
-                  Lembrar de mim
-                </Label>
+                  {showConfirmPassword ? (
+                    <EyeOff className="w-4 h-4" />
+                  ) : (
+                    <Eye className="w-4 h-4" />
+                  )}
+                </button>
               </div>
+              {errors.confirmPassword && (
+                <p className="text-xs text-destructive">
+                  {errors.confirmPassword}
+                </p>
+              )}
             </div>
 
             {formError && (
@@ -229,31 +296,19 @@ export default function Login() {
                 <Loader2 className="w-4 h-4 animate-spin" />
               ) : (
                 <>
-                  Entrar <ArrowRight className="w-4 h-4 ml-1" />
+                  Criar conta <ArrowRight className="w-4 h-4 ml-1" />
                 </>
               )}
             </Button>
           </form>
-          <div className="relative my-6">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-sidebar-border" />
-            </div>
-            <div className="relative flex justify-center text-xs">
-              <span className="px-3 bg-sidebar text-sidebar-foreground">
-                ou continue com
-              </span>
-            </div>
-          </div>
-
-          <GoogleButton />
 
           <p className="text-center text-sm text-sidebar-foreground mt-6">
-            Nao tem conta?{" "}
+            Ja tem conta?{" "}
             <Link
-              to="/register"
+              to="/login"
               className="text-primary hover:text-primary/80 font-medium transition-colors"
             >
-              Criar conta gratis
+              Fazer login
             </Link>
           </p>
         </div>

@@ -29,6 +29,7 @@ import { ptBR } from "date-fns/locale";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { Transaction } from "@/types/transaction";
+import { CATEGORIES, PAYMENT_METHODS } from "@/shared/constants";
 
 interface AddTransactionModalProps {
   open: boolean;
@@ -40,27 +41,6 @@ interface AddTransactionModalProps {
     >,
   ) => Promise<string>;
 }
-
-const categories = [
-  "Alimentacao",
-  "Transporte",
-  "Saude",
-  "Assinaturas",
-  "Moradia",
-  "Educacao",
-  "Lazer",
-  "Renda",
-  "Renda Extra",
-  "Outros",
-];
-
-const paymentMethods = [
-  { value: "cartao", label: "Cartao" },
-  { value: "debito", label: "Debito" },
-  { value: "pix", label: "PIX" },
-  { value: "dinheiro", label: "Dinheiro" },
-  { value: "transferencia", label: "Transferencia" },
-];
 
 export function AddTransactionModal({
   open,
@@ -92,6 +72,7 @@ export function AddTransactionModal({
     setLoading(true);
     try {
       const numericAmount = Number(amount);
+
       await onCreateTransaction({
         description: description.trim(),
         category,
@@ -168,7 +149,7 @@ export function AddTransactionModal({
                   <SelectValue placeholder="Selecione" />
                 </SelectTrigger>
                 <SelectContent>
-                  {categories.map((cat) => (
+                  {CATEGORIES.map((cat) => (
                     <SelectItem key={cat} value={cat}>
                       {cat}
                     </SelectItem>
@@ -184,7 +165,7 @@ export function AddTransactionModal({
                   <SelectValue placeholder="Selecione" />
                 </SelectTrigger>
                 <SelectContent>
-                  {paymentMethods.map((method) => (
+                  {PAYMENT_METHODS.map((method) => (
                     <SelectItem key={method.value} value={method.value}>
                       {method.label}
                     </SelectItem>

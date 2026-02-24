@@ -10,16 +10,29 @@ interface RecentTransactionsProps {
 
 const formatRelativeDate = (date: Date) => {
   const today = new Date();
-  const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate());
-  const inputStart = new Date(date.getFullYear(), date.getMonth(), date.getDate());
-  const diffDays = Math.round((todayStart.getTime() - inputStart.getTime()) / (1000 * 60 * 60 * 24));
+  const todayStart = new Date(
+    today.getFullYear(),
+    today.getMonth(),
+    today.getDate(),
+  );
+  const inputStart = new Date(
+    date.getFullYear(),
+    date.getMonth(),
+    date.getDate(),
+  );
+  const diffDays = Math.round(
+    (todayStart.getTime() - inputStart.getTime()) / (1000 * 60 * 60 * 24),
+  );
 
   if (diffDays === 0) return "Hoje";
   if (diffDays === 1) return "Ontem";
   return date.toLocaleDateString("pt-BR", { day: "2-digit", month: "short" });
 };
 
-export function RecentTransactions({ className, transactions }: RecentTransactionsProps) {
+export function RecentTransactions({
+  className,
+  transactions,
+}: RecentTransactionsProps) {
   return (
     <div
       className={cn(
@@ -29,8 +42,10 @@ export function RecentTransactions({ className, transactions }: RecentTransactio
     >
       <div className="flex items-center justify-between mb-4">
         <div>
-          <h3 className="text-base font-semibold text-foreground">Transacoes Recentes</h3>
-          <p className="text-sm text-muted-foreground">Ultimos lancamentos</p>
+          <h3 className="text-base font-semibold text-foreground">
+            Transações Recentes
+          </h3>
+          <p className="text-sm text-muted-foreground">Ultimos lançamentos</p>
         </div>
         <Button variant="ghost" size="sm" className="text-primary">
           Ver todas
@@ -58,26 +73,36 @@ export function RecentTransactions({ className, transactions }: RecentTransactio
                 )}
               </div>
               <div>
-                <p className="text-sm font-medium text-foreground">{transaction.description}</p>
+                <p className="text-sm font-medium text-foreground">
+                  {transaction.description}
+                </p>
                 <p className="text-xs text-muted-foreground">
-                  {transaction.category} - {formatRelativeDate(transaction.date)}
+                  {transaction.category} -{" "}
+                  {formatRelativeDate(transaction.date)}
                 </p>
               </div>
             </div>
             <span
               className={cn(
                 "text-sm font-semibold",
-                transaction.type === "income" ? "text-success" : "text-foreground",
+                transaction.type === "income"
+                  ? "text-success"
+                  : "text-foreground",
               )}
             >
               {transaction.type === "income" ? "+" : ""}
-              R$ {Math.abs(transaction.amount).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
+              R${" "}
+              {Math.abs(transaction.amount).toLocaleString("pt-BR", {
+                minimumFractionDigits: 2,
+              })}
             </span>
           </div>
         ))}
 
         {transactions.length === 0 && (
-          <p className="text-sm text-muted-foreground py-4">Sem transacoes recentes.</p>
+          <p className="text-sm text-muted-foreground py-4">
+            Sem transações recentes.
+          </p>
         )}
       </div>
     </div>

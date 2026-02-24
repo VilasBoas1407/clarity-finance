@@ -3,9 +3,14 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
+  createUserWithEmailAndPassword,
+  fetchSignInMethodsForEmail,
+  GoogleAuthProvider,
   onAuthStateChanged,
+  signInWithEmailAndPassword,
   signInWithPopup,
   signOut,
+  updateProfile,
   User as FirebaseUser,
 } from "firebase/auth";
 import { User } from "@/types/user";
@@ -18,6 +23,12 @@ type AuthContextType = {
   user: User | null;
   loading: boolean;
   loginWithGoogle: () => Promise<void>;
+  loginWithEmailPassword: (email: string, password: string) => Promise<void>;
+  registerWithEmailPassword: (
+    name: string,
+    email: string,
+    password: string,
+  ) => Promise<void>;
   logout: () => Promise<void>;
 };
 
@@ -60,6 +71,72 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const loginWithEmailPassword = async (email: string, password: string) => {
+    try {
+      setLoading(true);
+      const methods = await fetchSignInMethodsForEmail(auth, email.trim());
+      const hasGoogleProvider = methods.includes(GoogleAuthProvider.PROVIDER_ID);
+      const hasPasswordProvider = methods.includes("password");
+
+      if (hasGoogleProvider && !hasPasswordProvider) {
+        throw new Error("GOOGLE_ACCOUNT_ONLY");
+      }
+
+      const result = await signInWithEmailAndPassword(
+        auth,
+        email.trim(),
+        password,
+      );
+      await loadOrCreateUser(result.user);
+      navigate("/dashboard");
+    } catch (error) {
+      console.error("Email/password login error:", error);
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const registerWithEmailPassword = async (
+    name: string,
+    email: string,
+    password: string,
+  ) => {
+    try {
+      setLoading(true);
+      const normalizedEmail = email.trim();
+      const methods = await fetchSignInMethodsForEmail(auth, normalizedEmail);
+      const hasGoogleProvider = methods.includes(GoogleAuthProvider.PROVIDER_ID);
+      const hasPasswordProvider = methods.includes("password");
+
+      if (hasGoogleProvider && !hasPasswordProvider) {
+        throw new Error("GOOGLE_ACCOUNT_ONLY");
+      }
+
+      if (hasPasswordProvider) {
+        throw new Error("EMAIL_ALREADY_REGISTERED");
+      }
+
+      const result = await createUserWithEmailAndPassword(
+        auth,
+        normalizedEmail,
+        password,
+      );
+
+      if (name.trim()) {
+        await updateProfile(result.user, { displayName: name.trim() });
+      }
+
+      await loadOrCreateUser(result.user);
+      navigate("/dashboard");
+    } catch (error) {
+      console.error("Register error:", error);
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const logout = async () => {
     try {
       await signOut(auth);
@@ -78,6 +155,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         user,
         loading,
         loginWithGoogle,
+        loginWithEmailPassword,
+        registerWithEmailPassword,
         logout,
       }}
     >

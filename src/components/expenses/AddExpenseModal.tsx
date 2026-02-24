@@ -29,6 +29,7 @@ import { ptBR } from "date-fns/locale";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { Transaction } from "@/types/transaction";
+import { CATEGORIES, PAYMENT_METHODS } from "@/shared/constants";
 
 interface AddExpenseModalProps {
   open: boolean;
@@ -40,27 +41,6 @@ interface AddExpenseModalProps {
     >,
   ) => Promise<string>;
 }
-
-const categories = [
-  "Alimentacao",
-  "Transporte",
-  "Saude",
-  "Assinaturas",
-  "Moradia",
-  "Educacao",
-  "Lazer",
-  "Renda",
-  "Renda Extra",
-  "Outros",
-];
-
-const paymentMethods = [
-  { value: "cartao", label: "Cartao" },
-  { value: "debito", label: "Debito" },
-  { value: "pix", label: "PIX" },
-  { value: "dinheiro", label: "Dinheiro" },
-  { value: "transferencia", label: "Transferencia" },
-];
 
 export function AddExpenseModal({
   open,
@@ -103,11 +83,11 @@ export function AddExpenseModal({
         paymentMethod,
         type,
       });
-      toast.success(`Lancamento "${description}" adicionado`);
+      toast.success(`Lançamento "${description}" adicionado`);
       resetForm();
       onOpenChange(false);
-    } catch {
-      toast.error("Nao foi possivel adicionar o lancamento");
+    } catch (error) {
+      toast.error("Não foi possível adicionar o lançamento");
     } finally {
       setLoading(false);
     }
@@ -150,7 +130,7 @@ export function AddExpenseModal({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="description">Descricao</Label>
+            <Label htmlFor="description">Descrição</Label>
             <Input
               id="description"
               placeholder="Ex: Supermercado, Freelance..."
@@ -168,7 +148,7 @@ export function AddExpenseModal({
                   <SelectValue placeholder="Selecione" />
                 </SelectTrigger>
                 <SelectContent>
-                  {categories.map((cat) => (
+                  {CATEGORIES.map((cat) => (
                     <SelectItem key={cat} value={cat}>
                       {cat}
                     </SelectItem>
@@ -184,7 +164,7 @@ export function AddExpenseModal({
                   <SelectValue placeholder="Selecione" />
                 </SelectTrigger>
                 <SelectContent>
-                  {paymentMethods.map((method) => (
+                  {PAYMENT_METHODS.map((method) => (
                     <SelectItem key={method.value} value={method.value}>
                       {method.label}
                     </SelectItem>
