@@ -1,6 +1,8 @@
 # 💰 Clarity Finance
 
-> Aplicação web para controle financeiro pessoal com autenticação Google e persistência em tempo real no Firebase.
+> A web application for personal finance management with Google authentication and real-time persistence on Firebase.
+
+[Portuguese version here](README.pt-br.md)
 
 ![React](https://img.shields.io/badge/React-18-61DAFB?logo=react&logoColor=white)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript&logoColor=white)
@@ -9,149 +11,150 @@
 
 ![alt text](image.png)
 ![alt text](image-1.png)
----
-
-## ✨ Funcionalidades
-
-- 🔐 **Login com Google** via Firebase Auth
-- 📊 **Dashboard** com indicadores financeiros consolidados
-- 💸 **Transações** — cadastro, listagem, edição e exclusão com filtro mensal
-- 🔁 **Gastos recorrentes** — gestão de despesas fixas
-- 🛡️ **Rotas protegidas** por autenticação
-- 📈 **Gráficos** interativos com Recharts
 
 ---
 
-## 🛠️ Stack
+## ✨ Features
 
-| Categoria | Tecnologia |
+- 🔐 **Google Sign-In** via Firebase Auth
+- 📊 **Dashboard** with consolidated financial indicators
+- 💸 **Transactions** — create, list, edit, and delete with monthly filtering
+- 🔁 **Recurring expenses** — manage your fixed costs
+- 🛡️ **Protected routes** with authentication guards
+- 📈 **Interactive charts** powered by Recharts
+
+---
+
+## 🛠️ Tech Stack
+
+| Category | Technology |
 |---|---|
 | Frontend | React 18 + TypeScript |
-| Build | Vite |
-| Estilização | Tailwind CSS + shadcn/ui |
-| Autenticação | Firebase Auth (Google) |
-| Banco de dados | Cloud Firestore |
-| Roteamento | React Router |
-| Gráficos | Recharts |
-| Testes | Vitest |
+| Build tool | Vite |
+| Styling | Tailwind CSS + shadcn/ui |
+| Authentication | Firebase Auth (Google) |
+| Database | Cloud Firestore |
+| Routing | React Router |
+| Charts | Recharts |
+| Testing | Vitest |
 
 ---
 
-## 🚀 Como rodar localmente
+## 🚀 Running locally
 
-### Pré-requisitos
+### Prerequisites
 
 - Node.js 18+
 - npm 9+
-- Projeto Firebase com **Authentication** e **Firestore** habilitados
+- Firebase project with **Authentication** and **Firestore** enabled
 
-### Passo a passo
+### Step by step
 
-**1. Clone o repositório**
+**1. Clone the repository**
 
 ```bash
 git clone https://github.com/VilasBoas1407/clarity-finance.git
 cd clarity-finance
 ```
 
-**2. Instale as dependências**
+**2. Install dependencies**
 
 ```bash
 npm install
 ```
 
-**3. Configure as variáveis de ambiente**
+**3. Set up environment variables**
 
-Copie o arquivo de exemplo e preencha com as credenciais do seu projeto Firebase:
+Copy the example file and fill in your Firebase project credentials:
 
 ```bash
 cp .env.example .env
 ```
 
-| Variável | Descrição |
+| Variable | Description |
 |---|---|
-| `VITE_FIREBASE_API_KEY` | Chave de API do Firebase |
-| `VITE_FIREBASE_AUTH_DOMAIN` | Domínio de autenticação |
-| `VITE_FIREBASE_PROJECT_ID` | ID do projeto |
-| `VITE_FIREBASE_STORAGE_BUCKET` | Bucket de storage |
-| `VITE_FIREBASE_MESSAGING_SENDER_ID` | ID do sender |
-| `VITE_FIREBASE_APP_ID` | ID do app |
-| `VITE_FIREBASE_MEASUREMENT_ID` | ID de analytics (opcional) |
+| `VITE_FIREBASE_API_KEY` | Firebase API key |
+| `VITE_FIREBASE_AUTH_DOMAIN` | Authentication domain |
+| `VITE_FIREBASE_PROJECT_ID` | Project ID |
+| `VITE_FIREBASE_STORAGE_BUCKET` | Storage bucket |
+| `VITE_FIREBASE_MESSAGING_SENDER_ID` | Messaging sender ID |
+| `VITE_FIREBASE_APP_ID` | App ID |
+| `VITE_FIREBASE_MEASUREMENT_ID` | Analytics measurement ID (optional) |
 
-**4. Inicie o servidor de desenvolvimento**
+**4. Start the development server**
 
 ```bash
 npm run dev
 ```
 
-Acesse `http://localhost:5173` no seu navegador.
+Open `http://localhost:5173` in your browser.
 
 ---
 
-## 📜 Scripts disponíveis
+## 📜 Available scripts
 
 ```bash
-npm run dev          # Servidor de desenvolvimento
-npm run build        # Build de produção
-npm run preview      # Preview do build gerado
-npm run lint         # Análise estática de código
-npm run test         # Executa os testes (Vitest)
-npm run test:watch   # Testes em modo watch
+npm run dev          # Development server
+npm run build        # Production build
+npm run preview      # Preview the production build
+npm run lint         # Static code analysis
+npm run test         # Run tests (Vitest)
+npm run test:watch   # Run tests in watch mode
 ```
 
 ---
 
-## 🗂️ Estrutura de dados (Firestore)
+## 🗂️ Firestore data structure
 
-Os dados são organizados por usuário autenticado:
+Data is organized per authenticated user:
 
 ```
 users/
 └── {uid}/
-    ├── (documento do usuário)
+    ├── (user document)
     ├── transactions/
     │   └── {transactionId}
     └── recurringExpenses/
         └── {expenseId}
 ```
 
-### Campos de uma `transaction`
+### `transaction` fields
 
-| Campo | Tipo | Descrição |
+| Field | Type | Description |
 |---|---|---|
-| `description` | string | Descrição da transação |
-| `category` | string | Categoria (ex: alimentação, saúde) |
-| `amount` | number | Valor |
-| `type` | string | `income` ou `expense` |
-| `paymentMethod` | string | Método de pagamento |
-| `date` | timestamp | Data da transação |
-| `yearMonth` | string | Formato `YYYY-MM` — usado para filtro mensal |
-| `createdAt` | timestamp | Data de criação |
-| `updatedAt` | timestamp | Última atualização |
-| `userId` | string | UID do usuário dono |
+| `description` | string | Transaction description |
+| `category` | string | Category (e.g., food, health) |
+| `amount` | number | Amount |
+| `type` | string | `income` or `expense` |
+| `paymentMethod` | string | Payment method |
+| `date` | timestamp | Transaction date |
+| `yearMonth` | string | Format `YYYY-MM` — used for monthly filtering |
+| `createdAt` | timestamp | Creation date |
+| `updatedAt` | timestamp | Last updated date |
+| `userId` | string | Owner's UID |
 
-> ⚠️ O campo `yearMonth` é obrigatório para que a transação apareça no filtro mensal do dashboard.
+> ⚠️ The `yearMonth` field is required for a transaction to appear in the dashboard's monthly filter.
 
 ---
 
-## 🗺️ Rotas da aplicação
+## 🗺️ Application routes
 
-| Rota | Descrição |
+| Route | Description |
 |---|---|
 | `/` | Landing page |
-| `/login` | Página de login |
-| `/dashboard` | Dashboard principal |
-| `/transactions` | Listagem e gestão de transações |
-| `/recurring` | Gastos recorrentes |
-| `/cards` | Cartões |
-| `/reports` | Relatórios |
-| `/settings` | Configurações |
+| `/login` | Login page |
+| `/dashboard` | Main dashboard |
+| `/transactions` | Transaction list and management |
+| `/recurring` | Recurring expenses |
+| `/cards` | Cards |
+| `/reports` | Reports |
+| `/settings` | Settings |
 
 ---
 
-## 🔒 Regras de segurança (Firestore)
+## 🔒 Firestore security rules
 
-Configure as regras abaixo no console do Firebase para garantir que cada usuário acesse apenas seus próprios dados:
+Apply the rules below in your Firebase console to ensure each user can only access their own data:
 
 ```
 rules_version = '2';
@@ -175,10 +178,10 @@ service cloud.firestore {
 }
 ```
 
-> ❌ Se você receber o erro `Missing or insufficient permissions`, verifique se as regras acima estão aplicadas corretamente no seu projeto Firebase.
+> ❌ If you get a `Missing or insufficient permissions` error, make sure the rules above are correctly applied in your Firebase project.
 
 ---
 
-## 📄 Licença
+## 📄 License
 
-Este projeto está sob a licença MIT.
+This project is licensed under the MIT License.
